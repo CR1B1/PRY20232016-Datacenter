@@ -1,0 +1,115 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+<!DOCTYPE html>
+{% block content %}
+
+{% if request.user.authorization == 2 or request.user.role > 1 or request.user.is_superuser %}
+  <body>
+    <div class="container">
+      <div class="card text-center border-0 p-3">
+        <div class="card-title">
+          <img src="{% static 'img/generate.svg' %}" style="width: 15vh; height: 15vh;">
+        </div>
+        <h4>Lista de registro de usuarios</h4>
+      </div>
+      <div class="card text-center border-0 p-3">
+        <form method="get">
+          <div class="row">
+            <div class="col">
+              <label>Area de la empresa</label>
+              {{filter.form.user_area}}
+            </div>
+            <div class="col">
+              {% if request.user.role == 512%}
+                <label>Administrador</label>
+                {{filter.form.administrator}}
+              {% endif %}
+            </div>
+            <div class="col">
+              <label>Rol de usuario</label>
+              {{filter.form.role}}
+            </div>
+          </div>
+          <div class="row align-items-center p-3">
+            <div class="col text-center">
+              <button class="btn btn-primary btn-lg" type="submit">Buscar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="row">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Primer nombre</th>
+              <th scope="col">Segundo nombre</th>
+              <th scope="col">Email</th>
+              <th scope="col">Nombre de usuario</th>
+              <th scope="col">Rol</th>
+              <th scope="col">Administrador</th>
+              <th scope="col">Area</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in page_obj %}
+            <tr>
+              <th scope="row">{{item.id}}</th>
+              <td>{{item.first_name}}</td>
+              <td>{{item.last_name}}</td>
+              <td>{{item.email}}</td>
+              <td>{{item.username}}</td>
+              <td>{{item.get_role_display }}</td>
+              <td>{{item.administrator.email}}</td>
+              <td>{{item.user_area.area_name}}</td>
+              {% if item.change_password and request.user.role == 512 %}
+                <td>
+                    <div class="row align-items-center p-3">
+                        <div class="col text-center">
+                            <a href={% url 'authentication:change-password' pk=item.id %} class="btn btn-primary btn-sm"><strong>Reestablecer contraseña</strong></a>
+                        </div>
+                </td>
+              {% else %}
+                <td><img src={% static "img/solved.svg" %} height="25px" width="25px"></td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="card text-center border-0">
+          <div class="pagination justify-content-center">
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation bootstrap">
+              <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1">Primera pagina</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><span
+                      aria-hidden="true">&laquo;</span></a></li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <li class="page-item"><a
+                    class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                  {% endif %}
+                  {% endfor %}
+                  {% if page_obj.has_next %}
+                  <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"><span
+                        aria-hidden="true">&raquo;</span></a></li>
+                  <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Ultima pagina</a>
+                  </li>
+                  {% endif %}
+              </ul>
+            </nav>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+{% endif %}
+{% endblock %}
+
+</html>

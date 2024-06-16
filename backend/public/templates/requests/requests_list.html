@@ -1,0 +1,113 @@
+{% extends 'base/base.html'%}
+
+{% load static %}
+<!DOCTYPE html>
+{% block content %}
+
+{% if request.user.role == 512 or request.user.is_superuser %}
+    <body>
+    <div class="container">
+        <div class="card text-center border-0 p-3">
+        <div class="card-title">
+            <img src="{% static 'img/generate.svg' %}" style="width: 15vh; height: 15vh;">
+        </div>
+        <h4>Lista de registro de usuarios</h4>
+        </div>
+        <div class="row">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Primer nombre</th>
+                <th scope="col">Segundo nombre</th>
+                <th scope="col">Email</th>
+                <th scope="col">Nombre de usuario</th>
+                <th scope="col">Rol</th>
+                <th scope="col">Administrador</th>
+                <th scope="col">Area</th>
+                <th scope="col">Autorizacion</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in page_obj %}
+            <tr>
+                <th scope="row">{{item.request_user.id}}</th>
+                <td>{{item.request_user.first_name}}</td>
+                <td>{{item.request_user.last_name}}</td>
+                <td>{{item.request_user.email}}</td>
+                <td>{{item.request_user.username}}</td>
+                <td>{{item.request_user.get_role_display }}</td>
+                <td>{{item.request_user.administrator.email}}</td>
+                <td>{{item.request_user.user_area.area_name}}</td>
+                {% if item.request_user.authorization == 1 %}
+                <td>
+                    <form method="post" action={% url 'public:access-authorization' pk=item.request_user.id %}>
+                        {% csrf_token %}
+                        <div class="row align-items-center p-3">
+                            <div class="col text-center">
+                                <button class="btn btn-primary btn-sm" type="submit"><strong>Autorizar</strong></button>
+                            </div>
+                        </div>
+                    </form>
+                </td>
+                {% else %}
+                    <td><img src={% static "img/solved.svg" %} height="25px" width="25px"></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="card text-center border-0">
+            <div class="pagination justify-content-center">
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation bootstrap">
+                <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1">Primera pagina</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><span
+                        aria-hidden="true">&laquo;</span></a></li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <li class="page-item"><a
+                    class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"><span
+                        aria-hidden="true">&raquo;</span></a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Ultima pagina</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            </div>
+        </div>
+        </div>
+    </div>
+    </body>
+{% else %}
+    <body>
+        <div class="container p-3 mt-9">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <div class="error-template">
+                        <h1>No tienes autorizacion</h1>
+                        <div class="error-details">
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam numquam reiciendis architecto, voluptates quam sapiente quaerat unde provident consequuntur voluptas corporis odio. Voluptas quae deleniti perferendis ducimus amet itaque dignissimos?
+                        </div>
+                        <div class="error-actions p-3 mt-2">
+                            <a href={% url 'public:index' %} class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-home"></span>Inicio</a><a href="http://www.jquery2dotnet.com" class="btn btn-default btn-lg"><span class="glyphicon glyphicon-envelope"></span>Contactanos</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+{% endif %}
+{% endblock %}
+
+</html>

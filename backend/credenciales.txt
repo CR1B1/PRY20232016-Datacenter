@@ -1,0 +1,4 @@
+-->Superadministrador:  email: admin@admin.com  password: admin
+-->Administrador parte publica: email: administrador@empresa.com password: 5N~n34,&5Cb-
+-->Empleado parte publica: email: empleado@empresa.com password: 5N~n34,&5Cb-
+-->Manager parte publica email: manager@empresa.com password: 5N~n34,&5Cb-

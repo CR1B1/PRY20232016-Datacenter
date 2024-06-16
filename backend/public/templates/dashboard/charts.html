@@ -1,0 +1,235 @@
+{% extends "base/base.html" %}
+
+{% block title %} Charts {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+		<div class="content p-5 d-flex justify-content-center">
+			<div class="page-inner">
+				<div class="card text-center border-0">
+					<h4 class="page-title">Dashboard</h4>
+					<div class="page-category"></div>
+				</div>
+					<div class="card border-0">
+						{% if request.user.role == 512 or request.user.is_superuser %}
+							<form method="get">
+								<div class="row align-items-center">
+										<div class="col">
+											
+										</div>
+										<div class="col p-3 text-center">
+											<label><strong>Areas</strong></label>
+											{{ filter.form.user_area }}
+										</div>
+										<div class="col">
+											
+										</div>
+									
+								</div>
+								<div class="col p-3 mb-3 text-center">
+									<button class="btn btn-primary btn-lg" type="submit">Buscar</button>
+								</div>
+							</form>
+						{% endif %}
+					</div>
+					<div class="row">
+						<div class="col-md-6 p-3">
+							<div class="card p-6">
+								<div class="card-header">
+									<div class="card-title"><h4>Grafico de prioridades</h4></div>
+									<div class="card-text"><p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Inventore, magnam pariatur? Repellendus cupiditate facilis iure quasi quidem eius repellat, a quam sequi delectus ducimus est nam eaque eligendi dolorem perferendis?</p></div>
+								</div>
+								<div class="card-body">
+									<div class="chart-container">
+										<canvas id="barChart"></canvas>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 p-3">
+							<div class="card p-6">
+								<div class="card-header">
+									<div class="card-title"><h4>Grafico de incidencias solucionadas</h4></div>
+									<div class="card-text"><p> Adipisci aliquid unde voluptatem, accusamus excepturi nisi veniam eaque sint enim alias maxime quos placeat et cupiditate, facilis, qui laboriosam vero similique!</p></div>
+								</div>
+								<div class="card-body">
+									<div class="chart-container">
+										<canvas id="pieChart" style="width: 50%; height: 50%"></canvas>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col p-3">
+							<div class="card p-6 text-center">
+								<div class="card-header">
+									<div class="card-title"><h4>Grafico de prioridades</h4></div>
+									<div class="card-text"><p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Inventore, magnam pariatur? Repellendus cupiditate facilis iure quasi quidem eius repellat, a quam sequi delectus ducimus est nam eaque eligendi dolorem perferendis?</p></div>
+								</div>
+								<div class="card-body">
+									<div class="chart-container">
+										<canvas id="incidencesBarChart"></canvas>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+			</div>
+		</div>   
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+	<!-- Atlantis DEMO methods, don't include it in your project! -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script src="/static/assets/js/setting-demo2.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script>
+        function removeNull(array) {
+            return array.filter(element => {
+              return element !== null;
+            });
+          }
+		var barChart = document.getElementById('barChart').getContext('2d'),
+		pieChart = document.getElementById('pieChart').getContext('2d'),
+		incidencesBarChart = document.getElementById('incidencesBarChart').getContext('2d')
+		//stackedincidencesBarChart = document.getElementById('stackedincidencesBarChart').getContext('2d')
+        let bar_labels = [{% for value in priority_data %}"{{value.priority}}",{% endfor %}null]
+        let bar_data = [{% for value in priority_data %}"{{value.count_priority}}",{% endfor %}null]
+		let pie_labels = [{% for value in solved_data %}"{{value.solution}}",{% endfor %}null]
+        let pie_data = [{% for value in solved_data %}"{{value.count_solution}}",{% endfor %}null]
+		let bar_labels_incidences = [{% for value in incidences_per_user %}"{{value.username}}",{% endfor %}null]
+        let bar_data_incidences = [{% for value in incidences_per_user %}"{{value.count_incidences}}",{% endfor %}null]      
+        var myBarChart = new Chart(barChart, {
+                type: 'bar',
+                data: {
+                    labels: removeNull(bar_labels),
+                    datasets : [{
+                        label: "Prioridad",
+                        backgroundColor :["#1d7af3","#f3545d","#fdaf4b"],
+                        borderColor: 'rgb(23, 125, 255)',
+                        data: removeNull(bar_data),
+                    }],
+                },
+                options: {
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    },
+                }
+            });
+
+		var myPieChart = new Chart(pieChart, {
+			type: 'pie',
+			data: {
+				datasets: [{
+					data: removeNull(pie_data),
+					backgroundColor :["#1d7af3","#f3545d","#fdaf4b"],
+					borderWidth: 0
+				}],
+				labels: removeNull(pie_labels)
+			},
+			options : {
+				responsive: true, 
+				maintainAspectRatio: false,
+				legend: {
+					position : 'bottom',
+					labels : {
+						fontColor: 'rgb(154, 154, 154)',
+						fontSize: 11,
+						usePointStyle : true,
+						padding: 20
+					}
+				},
+				pieceLabel: {
+					render: 'percentage',
+					fontColor: 'white',
+					fontSize: 14,
+				},
+				tooltips: false,
+				layout: {
+					padding: {
+						left: 20,
+						right: 20,
+						top: 20,
+						bottom: 20
+					}
+				},
+			}
+		});
+
+		var incidencesBarChart = new Chart(incidencesBarChart, {
+			type: 'bar',
+			data: {
+				labels: removeNull(bar_labels_incidences),
+				datasets : [{
+					label: "Incidencias",
+					backgroundColor :["#1d7af3","#f3545d","#fdaf4b"],
+					borderColor: 'rgb(23, 125, 255)',
+					data: removeNull(bar_data_incidences),
+				}],
+			},
+			options: {
+				responsive: true, 
+				maintainAspectRatio: false,
+				scales: {
+					yAxes: [{
+						ticks: {
+							beginAtZero:true
+						}
+					}]
+				},
+			}
+		});
+
+		/*var stackedChart = new Chart(stackedincidencesBarChart, { 
+            type: 'bar', 
+            data: { 
+                labels: ["bike", "car", "scooter",  
+                    "truck", "auto", "Bus"], 
+                datasets: [{ 
+                    label: 'worst', 
+                    backgroundColor: "blue", 
+                    data: [17, 16, 4, 11, 8, 9], 
+                }, { 
+                    label: 'Okay', 
+                    backgroundColor: "green", 
+                    data: [14, 2, 10, 6, 12, 16], 
+                }, { 
+                    label: 'bad', 
+                    backgroundColor: "red", 
+                    data: [2, 21, 13, 3, 24, 7], 
+                }], 
+            }, 
+            options: { 
+                plugins: { 
+                    title: { 
+                        display: true, 
+                        text: 'Stacked Bar chart for pollution status' 
+                    }, 
+                }, 
+                scales: { 
+                    x: { 
+                        stacked: true, 
+                    }, 
+                    y: { 
+                        stacked: true 
+                    } 
+                } 
+            } 
+        }); */
+		
+
+	</script>
+
+{% endblock javascripts %}

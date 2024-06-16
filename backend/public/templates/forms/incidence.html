@@ -1,0 +1,40 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% block stylesheets %}
+    <style href="{% static 'css/incidence.css' %}"></style>
+    {% endblock stylesheets %}
+</head>
+{% block content %}
+        <body>
+            <div class="container">
+                <div class="card text-center border-0 p-3 me-3">
+                    <div class="form-group">
+                       <img src="{% static 'img/register.svg' %}" style="width: 15vh; height: 15vh;">
+                    </div>
+                    <div class="form-group">
+                        <div class="login-form">
+                            <div class="card text-center border-0 p-3">
+                                <h4>Registro de incidencias</h4>
+                                <small></small>
+                            </div>
+                            <form action={% url 'public:register-incidence'%} method="post">
+                                {% csrf_token %}
+                                {{ form|crispy }}
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary btn-lg">Registrar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </body>
+
+{% endblock content %}
+
+</html>

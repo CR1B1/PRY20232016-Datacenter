@@ -1,0 +1,17 @@
+services:
+  jupyter:
+    image: jupyter/minimal-notebook
+    hostname: jupyter
+    container_name: jupyter
+    restart: unless-stopped
+    working_dir: /home/
+    ports:
+      - "8888:8888"
+    volumes:
+      - ${PWD}:/home/root/work
+      - ${PWD}:/home/root/work/environments
+    user: root
+    command: "start-notebook.sh --NotebookApp.token="
+
+volumes:
+  jupyter:

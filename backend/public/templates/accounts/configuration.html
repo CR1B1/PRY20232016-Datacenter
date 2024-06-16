@@ -1,0 +1,76 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+<head>
+    {% block stylesheets %}
+        <style>
+            .fileInput {
+                cursor: pointer;
+                position:absolute;
+                top: 0;
+                height: 50%;
+                right: 0;
+                z-index: 99;
+                font-size:50px;
+                opacity: 0;
+                -moz-opacity: 0;
+                filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0)
+            }
+        </style>
+    {% endblock stylesheets %}
+</head>
+
+
+{% block content %}
+    <body>
+        <div class="container">
+            <div class="card p-3 border-0">
+                <div class="card text-center border-0">
+                    {% if message %}
+                        <div class="alert alert-success" role="alert">
+                          {{ message }}
+                        </div>
+                    {% endif %}
+                    {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                          {{ error }}
+                        </div>
+                    {% endif %}
+                    <div class="form-group">
+                        {% if request.user.role == 512 %}
+                            {% if request.user.company_logo %}
+                                <img src="{{ request.user.company_logo.url }}" style="width: 15vh; height: 15vh;">
+                            {% endif %}
+                            <form enctype="multipart/form-data" action="{% url 'public:change-logo' %}" method="post">
+                                {% csrf_token %}
+                                <div class="d-flex justify-content-center p-3">
+                                    <div>
+                                        <input type="file" class="fileInput" name="company_logo">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-rounded pt-2">Cambiar</button>
+                            </form>
+                        {% else %}
+                            {% if request.user.administrator.company_logo %}
+                                <img src="{{ request.user.administrator.company_logo.url }}" style="width: 15vh; height: 15vh;">
+                            {% endif %}
+                        {% endif %}
+                     </div>
+                    <h4>Configuración de mi cuenta</h4>
+                </div>
+                <div class="forms mt-5">
+                    <div class="form-content">
+                        <div class="configuration-form">
+                            <form action="{% url 'authentication:update' %}" method="POST">
+                                {% csrf_token %}
+                                {% crispy form %}
+                                <button type="submit" class="btn btn-primary btn-rounded pt-2">Actualizar datos</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+{% endblock content %}

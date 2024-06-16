@@ -1,0 +1,80 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block title %} Pagina de Usuario {% endblock %} 
+
+{% block stylesheets %}
+	<style>
+		.card-text{
+			font-size:19px;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+	</style>
+{% endblock %}
+
+{% block content %}
+	<body>
+		<div class="container-fluid">
+			<div class="position-relative">
+				<div class="item position-relative">
+						<div class="container">
+							<div class="card text-center border-0">
+								<h4>Bienvenido:</h4>
+								<h2><strong>{{request.user.email}}</strong></h2>
+								<small></small>
+							</div>
+								<div class="row p-1">
+									<div class="col-sm-6 p-2">
+									  <div class="card text-center h-100 border-primary justify-content-center p-3" style="width: 40rem; height: 20rem;">
+										<img class="card-img-top" src={% static "img/register.svg" %} alt="Card image cap" height="100px" width="100px">
+										<div class="card-body">
+											<h2 class="card-title">Registro de incidencias</h5>
+											<p class="card-text"></p>
+											<a href="{% url 'public:register-incidence' %}" class="">AQUI</a>
+										</div>
+									  </div>
+									</div>
+									<div class="col-sm-6 p-2">
+										<div class="card text-center h-100 border-primary justify-content-center p-3" style="width: 40rem; height: 20rem;">
+										  <img class="card-img-top" src={% static "img/config.svg" %} alt="Card image cap" height="100px" width="100px">
+										  <div class="card-body">
+											  <h2 class="card-title">Ver mis incidencias</h5>
+											  <p class="card-text"></p>
+											  <a href="{% url 'public:incidences' %}" class="">AQUI</a>
+										  </div>
+										</div>
+									</div>
+								</div>
+								{% if request.user.authorization == 2 %}
+									<div class="row p-1">
+										<div class="col-sm-3 p-2">
+										</div>
+										<div class="col-sm-3 p-2">
+											<div class="card text-center h-100 border-primary justify-content-center p-3" style="width: 40rem; height: 20rem;">
+											<img class="card-img-top" src={% static "img/users.svg" %} alt="Card image cap" height="100px" width="100px">
+											<div class="card-body">
+												<h2 class="card-title">Ver los usuarios</h5>
+												<p class="card-text"></p>
+												<a href="{% url 'public:my-users' %}" class="">AQUI</a>
+											</div>
+											</div>
+										</div>
+										<div class="col-sm-3 p-2">
+										</div>
+									</div>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	<body>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+{% endblock javascripts %}

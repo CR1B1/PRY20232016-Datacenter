@@ -1,0 +1,166 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block stylesheet %}
+{% endblock stylesheet %}
+<!DOCTYPE html>
+<html lang="en">
+{% block content %}
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="card text-center border-0 p-3">
+        <div class="card-title">
+          <img src="{% static 'img/generate.svg' %}" style="width: 15vh; height: 15vh;">
+        </div>
+        <h4>Lista de registro de incidencias</h4>
+      </div>
+      <div class="card text-center border-0 p-3">
+        <form method="get">
+          <div class="row">
+            <div class="col">
+              <label>Fecha inicial</label>
+              {{filter.form.start_date}}
+            </div>
+            <div class="col">
+              <label>Fecha final</label>
+              {{filter.form.final_date}}
+            </div>
+            <div class="col">
+              <label>Prioridad</label>
+              {{filter.form.incidence_subject}}
+            </div>
+            <div class="col">
+              <label><strong>Estado</strong></label>
+              {{filter.form.solved}}
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <div class="col text-center">
+              <button class="btn btn-primary btn-lg" type="submit">Buscar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="row">
+      <div class="card border-0">
+        {% for incidence in page_obj %}
+        <div id="accordion">
+          <div class="card mb-3">
+            <div class="card-header" id="heading{{ forloop.counter }}">
+              <h2 class="mb-0">
+                <button class="btn btn-block" type="button" data-toggle="collapse" data-target="#collapse{{ forloop.counter }}"
+                  aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                  aria-controls="collapse{{ forloop.counter }}" style="font-color: black;">
+                  <div class="row m-auto">
+                    <div class="col-md-3">
+                      {{ incidence.incidence_detail|truncatechars:20 }}
+                      <label><strong>{{ incidence.incidence_subject.priority }}</strong></label>
+                      <img src={% if incidence.solved %}{% static "img/solved.svg" %}{% else %}{% static "img/no_solved.svg" %}{% endif %} height="25px" width="25px">
+                      <br>
+                      <label>Creado por: <strong>{{ incidence.user.username }}</strong></label>
+                    </div>
+                    <div class="col-md-3">
+                      {{ incidence.create_date }}
+                      <br>
+                      <small>Fecha de creacion</small>
+                    </div>
+                    <div class="col-md-3">
+                      {{ incidence.target_date }}
+                      <br>
+                      <small>Fecha de solucion prevista</small>
+                    </div>
+                    {% if incidence.solved %}
+                      <div class="col-md-3">
+                        {{ incidence.solved_date }}
+                        <br>
+                        <small>Fecha de solucion</small>
+                      </div>
+                    {% endif %}
+                </div>
+                </button>
+              </h2>
+            </div>
+            <div id="collapse{{ forloop.counter }}" class="collapse {% if forloop.first %}show{% endif %}"
+              aria-labelledby="heading{{ forloop.counter }}" data-parent="#accordion">
+              <div class="card-body">
+                <h5 class="card-title"><label>Prioridad: </label><strong> {{ incidence.incidence_subject.priority }}</strong></h5>
+                <h6><label>{{ incidence.user.first_name }} {{ incidence.user.last_name }}</label><strong> @{{ incidence.user.username }}</strong></h5>
+                <h7><label>Area de trabajo:</label>{{ incidence.user.user_area }}<h7>
+                <div class="card-body">
+                  {{ incidence.incidence_detail }}
+                </div>
+                <blockquote class="blockquote mb-0">
+                  <small><label>Fecha de creacion: </label><strong> {{ incidence.create_date }}</strong></small>
+                  <br>
+                  <small><label>Fecha de solucion prevista: </label><strong> {{ incidence.target_date }}</strong></small>
+                </blockquote>
+                <div class="card-footer text-muted text-center">
+                  <form method="post" action={% url 'public:delete-incidence' pk=incidence.id %}>
+                    {% csrf_token %}
+                    <div class="row align-items-center p-3">
+                        <div class="col text-center">
+                            <button class="btn btn-danger btn-sm" type="submit"><strong>Eliminar</strong></button>
+                        </div>
+                    </div>
+                  </form>
+                  {% if incidence.solved %}
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha de solucion: {{ incidence.solved_date }}</h6>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="row p-2">
+        <div class="card text-center border-0">
+          <div class="pagination justify-content-center">
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation bootstrap">
+              <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1">Primera pagina</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><span
+                      aria-hidden="true">&laquo;</span></a></li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <li class="page-item"><a
+                    class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                  {% endif %}
+                  {% endfor %}
+                  {% if page_obj.has_next %}
+                  <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"><span
+                        aria-hidden="true">&raquo;</span></a></li>
+                  <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Ultima pagina</a>
+                  </li>
+                  {% endif %}
+              </ul>
+            </nav>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+{% endblock %}
+
+</html>
+
+{% block javascripts %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+  integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+  crossorigin="anonymous"></script>
+<script> src = "{% static 'js/collapse.js' %}"</script>
+<script> src = "{% static 'js/datepicker.js' %}"</script>
+{% endblock javascripts %}

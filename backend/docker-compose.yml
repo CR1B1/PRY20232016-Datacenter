@@ -1,0 +1,70 @@
+services:
+  web:
+    build: 
+        context: .
+        dockerfile: Dockerfile
+        network: backend-network
+        privileged: true
+        
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    volumes:
+        - ../..:/workspaces:cached      
+    networks:
+      - backend
+      
+    ports:
+      - "5000:5000"
+      
+    environment:
+      DEBUG: 1
+    
+  db:
+    container_name: db
+    
+    image: postgres
+    
+    restart: always
+    
+    volumes:
+      - ./data/db:/var/lib/postgresql/data:z
+      
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: test_db
+      
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d test_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+ 
+  jupyter:
+    image: jupyter/minimal-notebook
+    hostname: jupyter
+    container_name: jupyter
+    restart: unless-stopped
+    runtime: nvidia
+    ports:
+      - "8888:8888"
+    volumes:
+      - work:/home/root/work
+      - ${PWD}/work/environments:/home/root/work/environments
+    working_dir: /home/root/work
+    user: root
+    
+networks:
+  backend:
+    driver: "bridge"
+     
+volumes:
+  db:
+  web:
